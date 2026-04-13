@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Control de Pandemias - 3º ESO</title>
+    
+    <!-- Tailwind CSS (Para los estilos y colores) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome (Para los iconos) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Librerías de React y Babel para que funcione en un archivo simple -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Animaciones personalizadas */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.1); }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans selection:bg-red-500/30 m-0 p-0">
+    
+    <!-- Aquí se cargará nuestra aplicación -->
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('portada');
+            
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* Cabecera */}
+                    <header className="bg-slate-900 border-b border-red-900/50 sticky top-0 z-50 shadow-lg shadow-red-900/10">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex flex-col md:flex-row justify-between items-center py-4 gap-4 md:gap-0">
+                                <div className="flex items-center space-x-3 w-full md:w-auto justify-start">
+                                    <div className="p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                                        <i className="fa-solid fa-microscope text-2xl text-red-500"></i>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-xl font-bold text-white tracking-tight">Centro de Control de Pandemias</h1>
+                                        <p className="text-xs text-red-500 font-mono">Proyecto de Epidemiología - 3º ESO</p>
+                                    </div>
+                                </div>
+                                
+                                {/* Navegación Desktop & Mobile */}
+                                <nav className="flex overflow-x-auto w-full md:w-auto py-2 space-x-2 no-scrollbar">
+                                    <NavButton active={activeTab === 'portada'} onClick={() => setActiveTab('portada')} icon={<i className="fa-solid fa-house"></i>}>Inicio</NavButton>
+                                    <NavButton active={activeTab === 'historia'} onClick={() => setActiveTab('historia')} icon={<i className="fa-solid fa-book-open"></i>}>1. Archivos</NavButton>
+                                    <NavButton active={activeTab === 'instrucciones'} onClick={() => setActiveTab('instrucciones')} icon={<i className="fa-solid fa-clipboard-list"></i>}>2. Misiones</NavButton>
+                                    <NavButton active={activeTab === 'juego'} onClick={() => setActiveTab('juego')} icon={<i className="fa-solid fa-gamepad"></i>}>3. Simulador</NavButton>
+                                    <NavButton active={activeTab === 'analisis'} onClick={() => setActiveTab('analisis')} icon={<i className="fa-solid fa-circle-check"></i>}>4. Análisis</NavButton>
+                                </nav>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Contenido Principal */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+                        {activeTab === 'portada' && <PortadaSection onStart={() => setActiveTab('historia')} />}
+                        {activeTab === 'historia' && <HistoriaSection />}
+                        {activeTab === 'instrucciones' && <InstruccionesSection onPlayClick={() => setActiveTab('juego')} />}
+                        {activeTab === 'juego' && <JuegoSection />}
+                        {activeTab === 'analisis' && <AnalisisSection />}
+                    </main>
+                </div>
+            );
+        }
+
+        // --- COMPONENTES ---
+
+        function NavButton({ active, onClick, children, icon }) {
+            return (
+                <button
+                    onClick={onClick}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap
+                        ${active 
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-transparent'
+                        }`}
+                >
+                    {icon}
+                    <span>{children}</span>
+                </button>
+            );
+        }
+
+        function PortadaSection({ onStart }) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 fade-in">
+                    <div className="relative">
+                        <i className="fa-solid fa-biohazard text-9xl text-red-600 drop-shadow-[0_0_30px_rgba(239,68,68,0.6)] relative z-10"></i>
+                        <div className="absolute inset-0 bg-red-600 blur-3xl rounded-full animate-pulse-slow"></div>
+                    </div>
+                    
+                    <div className="space-y-4 max-w-3xl">
+                        <h2 className="text-red-500 font-mono tracking-widest uppercase text-sm">Laboratorio de Nivel 4</h2>
+                        <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight">
+                            PROYECTO <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500" style={{WebkitTextFillColor: 'transparent', WebkitBackgroundClip: 'text'}}>EPIDEMIA</span>
+                        </h1>
+                        <p className="text-xl text-slate-400 leading-relaxed mt-6">
+                            Vuestra misión es simular el impacto de los patógenos más letales y contagiosos de la historia. 
+                            Entender cómo se propagan es el primer paso para aprender a detenerlos.
+                        </p>
+                    </div>
+
+                    <button 
+                        onClick={onStart}
+                        className="group relative mt-8 inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-red-600 rounded-xl hover:bg-red-500 hover:-translate-y-1 shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)] border-none cursor-pointer"
+                    >
+                        <i className="fa-solid fa-heart-pulse text-xl mr-3 group-hover:animate-pulse"></i>
+                        INICIAR PROTOCOLO
+                    </button>
+                </div>
+            );
+        }
+
+        function HistoriaSection() {
+            const [expandedId, setExpandedId] = useState(null);
+
+            const diseases = [
+                {
+                    name: "Ébola",
+                    stats: "Alta mortalidad / Baja transmisión",
+                    icon: <i className="fa-solid fa-droplet text-3xl text-red-500"></i>,
+                    color: "border-red-500/30 bg-red-500/5",
+                    titleColor: "text-red-400",
+                    history: "Identificado en 1976 cerca del río Ébola (África). Su brote más grave fue entre 2014-2016. A pesar de su altísima mortalidad (50-90%), no se convirtió en crisis mundial debido a su difícil transmisión (fluidos directos) y a que el huésped enferma tan rápido que se aísla o fallece antes de contagiar a muchos.",
+                    key: "Enseña que una enfermedad extremadamente letal puede ser contenida si su transmisión es baja y se actúa rápido."
+                },
+                {
+                    name: "Peste Negra",
+                    stats: "Alta mortalidad / Alta transmisión",
+                    icon: <i className="fa-solid fa-bug text-3xl text-purple-500"></i>,
+                    color: "border-purple-500/30 bg-purple-500/5",
+                    titleColor: "text-purple-400",
+                    history: "Una de las mayores catástrofes de la historia (siglo XIV). Llegó a Europa por rutas comerciales desde Asia. Mató entre el 30% y el 50% de la población europea. Se propagó sin control por falta de higiene, ratas/pulgas y un desconocimiento científico total (no sabían qué era una bacteria).",
+                    key: "Demuestra el impacto devastador de un patógeno cuando la sociedad carece de conocimientos científicos e higiene."
+                },
+                {
+                    name: "Gripe Española",
+                    stats: "Baja/Media mortalidad / Altísima transmisión",
+                    icon: <i className="fa-solid fa-wind text-3xl text-blue-500"></i>,
+                    color: "border-blue-500/30 bg-blue-500/5",
+                    titleColor: "text-blue-400",
+                    history: "Surgió en 1918, al final de la I Guerra Mundial. El movimiento masivo de tropas en trenes y barcos fue clave. Infectó a un tercio de la población mundial y causó hasta 50 millones de muertes. Curiosamente, afectó mucho a adultos jóvenes sanos.",
+                    key: "Muestra cómo la globalización (incluso a principios del siglo XX) puede acelerar enormemente una pandemia."
+                },
+                {
+                    name: "COVID-19",
+                    stats: "Letalidad moderada / Alta transmisión",
+                    icon: <i className="fa-solid fa-globe text-3xl text-emerald-500"></i>,
+                    color: "border-emerald-500/30 bg-emerald-500/5",
+                    titleColor: "text-emerald-400",
+                    history: "Apareció en 2019 en Wuhan (China). Su éxito radicó en que muchas personas eran asintomáticas o tenían síntomas leves durante días, viajando en aviones por todo el mundo antes de saber que estaban contagiando. Puso a prueba a la ciencia moderna, logrando vacunas en tiempo récord.",
+                    key: "El patógeno moderno 'perfecto': letalidad controlada pero lo suficientemente contagioso como para paralizar el planeta."
+                }
+            ];
+
+            return (
+                <div className="space-y-8 transition-opacity duration-500">
+                    <div className="text-center max-w-3xl mx-auto space-y-4">
+                        <h2 className="text-3xl font-bold text-white">Archivos Confidenciales: Historia de las Pandemias</h2>
+                        <p className="text-slate-400 text-lg">
+                            Selecciona cada expediente para revelar la información. Debéis conocer al "enemigo" antes de entrar al simulador.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {diseases.map((d, i) => (
+                            <div 
+                                key={i} 
+                                onClick={() => setExpandedId(expandedId === i ? null : i)}
+                                className={`p-6 rounded-2xl border ${d.color} backdrop-blur-sm transition-all hover:scale-[1.02] duration-300 cursor-pointer ${expandedId === i ? 'shadow-[0_0_20px_rgba(255,255,255,0.05)] bg-slate-900/40' : ''}`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="p-3 bg-slate-900/80 rounded-xl shadow-inner w-16 h-16 flex items-center justify-center">
+                                            {d.icon}
+                                        </div>
+                                        <div>
+                                            <h3 className={`text-2xl font-bold ${d.titleColor} mb-1`}>{d.name}</h3>
+                                            <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-slate-900/50 text-slate-300 text-sm font-medium border border-slate-800">
+                                                <i className="fa-solid fa-heart-pulse text-xs mr-1"></i> {d.stats}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {expandedId === i ? <i className="fa-solid fa-chevron-up text-slate-400"></i> : <i className="fa-solid fa-chevron-down text-slate-400"></i>}
+                                    </div>
+                                </div>
+                                
+                                {expandedId === i && (
+                                    <div className="mt-6 space-y-4 transition-all duration-300">
+                                        <div className="h-px w-full bg-slate-800/50"></div>
+                                        <p className="text-slate-300 leading-relaxed">{d.history}</p>
+                                        <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700/50">
+                                            <p className="text-sm">
+                                                <strong className="text-slate-200">Clave para científicos: </strong> 
+                                                <span className="text-slate-400">{d.key}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function InstruccionesSection({ onPlayClick }) {
+            const [expandedId, setExpandedId] = useState(null);
+
+            const misiones = [
+                {
+                    title: "Misión 1: ÉBOLA",
+                    icon: <i className="fa-solid fa-droplet text-2xl text-red-500"></i>,
+                    color: "border-red-500/30 hover:border-red-500/50",
+                    titleColor: "text-red-400",
+                    type: "Virus",
+                    country: "África (ej. Sudán / RDC)",
+                    priority: "Subir síntomas graves rápido. Poca transmisión.",
+                    steps: [
+                        "Síntomas: Hemorragia → Fallo orgánico → Coma.",
+                        "Transmisión: Solo sangre / fluidos (nivel bajo). NO mejorar aire o agua.",
+                        "Habilidades: Resistencia al calor."
+                    ]
+                },
+                {
+                    title: "Misión 2: PESTE NEGRA",
+                    icon: <i className="fa-solid fa-bug text-2xl text-purple-500"></i>,
+                    color: "border-purple-500/30 hover:border-purple-500/50",
+                    titleColor: "text-purple-400",
+                    type: "Bacteria",
+                    country: "Asia Central o Europa",
+                    priority: "Alta transmisión inicial, seguida de alta letalidad.",
+                    steps: [
+                        "Transmisión: Roedores + Pulgas + Aire (nivel medio).",
+                        "Síntomas: Necrosis → Fallo orgánico → Muerte.",
+                        "Habilidades: Resistencia al frío."
+                    ]
+                },
+                {
+                    title: "Misión 3: GRIPE ESPAÑOLA",
+                    icon: <i className="fa-solid fa-wind text-2xl text-blue-500"></i>,
+                    color: "border-blue-500/30 hover:border-blue-500/50",
+                    titleColor: "text-blue-400",
+                    type: "Virus",
+                    country: "Europa o EE.UU.",
+                    priority: "Altísima transmisión, letalidad inicial baja.",
+                    steps: [
+                        "Transmisión: Aire + Agua + Aves.",
+                        "Síntomas: Tos, estornudos, fiebre (evita letalidad alta al inicio).",
+                        "Habilidades: Resistencia a medicamentos.",
+                        "Añadir síntomas graves solo cuando medio mundo esté contagiado."
+                    ]
+                },
+                {
+                    title: "Misión 4: COVID-19",
+                    icon: <i className="fa-solid fa-globe text-2xl text-emerald-500"></i>,
+                    color: "border-emerald-500/30 hover:border-emerald-500/50",
+                    titleColor: "text-emerald-400",
+                    type: "Virus",
+                    country: "Asia (ej. China)",
+                    priority: "Transmisión progresiva y silenciosa. Letalidad moderada.",
+                    steps: [
+                        "Transmisión: Aire + Superficies + Agua.",
+                        "Síntomas: Leves al inicio (Tos, Fiebre). Que pase desapercibido.",
+                        "Habilidades: Resistencia al frío y a los medicamentos."
+                    ]
+                }
+            ];
+
+            return (
+                <div className="space-y-8 transition-opacity duration-500">
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                            <i className="fa-solid fa-triangle-exclamation text-[200px]"></i>
+                        </div>
+                        <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i className="fa-solid fa-clipboard-list mr-3 text-red-500"></i> Protocolo de Simulación (Plague Inc.)
+                        </h2>
+                        <p className="text-slate-300 text-lg mb-6 max-w-3xl relative z-10">
+                            Trabajaréis en grupos de 2 o 3 agentes. Cada grupo realizará <strong>4 partidas</strong> (una por enfermedad). 
+                            Haced clic en cada misión para revelar los pasos. ¡Seguidlos exactamente para que los resultados sean comparables!
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                            {misiones.map((m, i) => (
+                                <div 
+                                    key={i} 
+                                    onClick={() => setExpandedId(expandedId === i ? null : i)}
+                                    className={`bg-slate-950 p-5 rounded-xl border ${m.color} transition-all cursor-pointer ${expandedId === i ? 'shadow-lg bg-slate-900/50' : ''}`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-12 h-12 flex items-center justify-center bg-slate-900 rounded-lg shadow-inner border border-slate-800">
+                                                {m.icon}
+                                            </div>
+                                            <h3 className={`text-xl font-bold ${m.titleColor}`}>{m.title}</h3>
+                                        </div>
+                                        {expandedId === i ? <i className="fa-solid fa-chevron-up text-slate-500"></i> : <i className="fa-solid fa-chevron-down text-slate-500"></i>}
+                                    </div>
+
+                                    {expandedId === i && (
+                                        <div className="mt-5 space-y-4 transition-all duration-300">
+                                            <div className="h-px w-full bg-slate-800/50"></div>
+                                            <ul className="space-y-2 text-sm text-slate-300">
+                                                <li><strong className="text-slate-400">Patógeno:</strong> {m.type}</li>
+                                                <li><strong className="text-slate-400">Origen:</strong> {m.country}</li>
+                                                <li><strong className="text-slate-400">Estrategia:</strong> {m.priority}</li>
+                                            </ul>
+                                            <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Evolución requerida:</p>
+                                                <ol className="list-decimal list-inside space-y-1 text-sm text-slate-400">
+                                                    {m.steps.map((s, idx) => <li key={idx}>{s}</li>)}
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-8 flex justify-center relative z-10">
+                            <button 
+                                onClick={onPlayClick}
+                                className="flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105 shadow-[0_0_20px_rgba(239,68,68,0.3)] border-none cursor-pointer"
+                            >
+                                <i className="fa-solid fa-gamepad text-2xl mr-2"></i>
+                                <span>Entrar al Simulador</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function JuegoSection() {
+            return (
+                <div className="space-y-4 h-full flex flex-col transition-opacity duration-500">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 p-4 rounded-xl border border-slate-800 gap-4 sm:gap-0">
+                        <div>
+                            <h2 className="text-xl font-bold text-white flex items-center">
+                                <i className="fa-solid fa-triangle-exclamation mr-2 text-yellow-500"></i> Nivel de Bioseguridad 4 Activado
+                            </h2>
+                            <p className="text-sm text-slate-400 mt-1">Anota tus resultados (Países, Muertes, % Cura) para el Análisis final.</p>
+                        </div>
+                        <a 
+                            href="https://www.miniplay.com/game/plague-inc-pandemic-simulator" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center no-underline whitespace-nowrap"
+                        >
+                            Abrir en ventana nueva <i className="fa-solid fa-arrow-up-right-from-square ml-2"></i>
+                        </a>
+                    </div>
+                    
+                    <div className="w-full bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800 flex-grow" style={{ minHeight: '600px' }}>
+                        <iframe 
+                            src="https://www.miniplay.com/embed/plague-inc-pandemic-simulator" 
+                            width="100%" 
+                            height="100%" 
+                            style={{ minHeight: '600px', border: 'none' }}
+                            allowFullScreen
+                            title="Plague Inc Simulator"
+                            className="w-full h-full"
+                        ></iframe>
+                    </div>
+                    <p className="text-xs text-center text-slate-500 mt-2">Si el juego no carga por bloqueos del navegador del colegio, haz clic en el botón superior derecho "Abrir en ventana nueva".</p>
+                </div>
+            );
+        }
+
+        function AnalisisSection() {
+            const [formData, setFormData] = useState({
+                teamName: '', q1: '', q2: '', q3: '', q4: '', q5: ''
+            });
+            const [showResults, setShowResults] = useState(false);
+            const [score, setScore] = useState(0);
+
+            const handleInputChange = (e) => {
+                setFormData({ ...formData, [e.target.name]: e.target.value });
+            };
+
+            const handleCorregir = (e) => {
+                e.preventDefault();
+                if (!formData.teamName || !formData.q1 || !formData.q2 || !formData.q3 || !formData.q4) {
+                    alert("Por favor, completad al menos vuestro nombre y las preguntas de selección antes de corregir.");
+                    return;
+                }
+
+                let puntos = 0;
+                if (formData.q1 === "c") puntos++;
+                if (formData.q2 === "b") puntos++;
+                if (formData.q3 === "a") puntos++;
+                
+                setScore(puntos);
+                setShowResults(true);
+            };
+
+            const getMailtoLink = () => {
+                const subject = encodeURIComponent(`Resultados Plague Inc - Equipo: ${formData.teamName}`);
+                const body = encodeURIComponent(
+                    `--- INFORME EPIDEMIOLÓGICO ---\nEquipo: ${formData.teamName}\nPuntuación de Test: ${score}/3\n\nQ1 (Límite Ébola): ${formData.q1}\nQ2 (Causa Gripe Esp.): ${formData.q2}\nQ3 (Patógeno Perfecto): ${formData.q3}\nQ4 (Estrategia): ${formData.q4}\nQ5 (Reflexión Juego): ${formData.q5}\n`
+                );
+                return `mailto:hugoarminio@gmail.com?subject=${subject}&body=${body}`;
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto space-y-8 transition-opacity duration-500">
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+                        <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+                            <i className="fa-solid fa-microscope mr-3 text-red-500"></i> Informe Final y Conclusiones
+                        </h2>
+                        <p className="text-slate-400 mb-6">
+                            Completad este cuestionario basándoos en los resultados de vuestras partidas y en la información leída. 
+                            Al terminar, podréis ver las correcciones generadas por la base de datos de la OMS.
+                        </p>
+
+                        <form onSubmit={handleCorregir} className="space-y-8">
+                            
+                            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800">
+                                <label className="block text-red-400 font-bold mb-2">Nombre del Equipo (Nombres de los alumnos):</label>
+                                <input 
+                                    type="text" 
+                                    name="teamName"
+                                    value={formData.teamName}
+                                    onChange={handleInputChange}
+                                    placeholder="Ej. María, Carlos y Laura" 
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-red-500 transition-colors"
+                                    required
+                                />
+                            </div>
+
+                            <div className="border-t border-slate-800 my-6"></div>
+
+                            <div className="space-y-6">
+                                <h3 className="text-xl font-bold text-slate-200">Sección A: Análisis Científico</h3>
+
+                                {/* Q1 */}
+                                <div className={`p-5 rounded-xl border transition-colors ${showResults ? (formData.q1 === 'c' ? 'border-emerald-500 bg-emerald-500/5' : 'border-red-500 bg-red-500/5') : 'border-slate-800 bg-slate-950'}`}>
+                                    <p className="font-bold text-slate-200 mb-3">1. En la simulación, ¿qué factor perjudica más que un virus letal como el Ébola se convierta en una pandemia mundial?</p>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q1" value="a" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>a) Que los médicos no encuentren una cura rápida.</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q1" value="b" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>b) Que no hay suficientes vuelos en África.</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q1" value="c" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>c) Que mata al huésped tan rápido que este no tiene tiempo de contagiar a otras personas.</span>
+                                        </label>
+                                    </div>
+                                    {showResults && (
+                                        <div className={`mt-4 p-3 rounded-lg text-sm ${formData.q1 === 'c' ? 'bg-emerald-900/40 text-emerald-300' : 'bg-red-900/40 text-red-300'}`}>
+                                            <strong>Anotación OMS:</strong> Correcto es la C. Un patógeno excesivamente letal y rápido "quema" su combustible antes de poder expandirse. Por eso el Ébola es más fácil de contener que la Gripe a nivel global.
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Q2 */}
+                                <div className={`p-5 rounded-xl border transition-colors ${showResults ? (formData.q2 === 'b' ? 'border-emerald-500 bg-emerald-500/5' : 'border-red-500 bg-red-500/5') : 'border-slate-800 bg-slate-950'}`}>
+                                    <p className="font-bold text-slate-200 mb-3">2. Históricamente, ¿qué factor fue clave para la rápida expansión de la Gripe Española en 1918 en comparación con la Peste Negra?</p>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q2" value="a" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>a) La total falta de higiene en las ciudades del siglo XX.</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q2" value="b" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>b) El movimiento masivo global de millones de soldados y refugiados por la Primera Guerra Mundial.</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q2" value="c" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>c) Que los virus mutan mucho más rápido que las bacterias.</span>
+                                        </label>
+                                    </div>
+                                    {showResults && (
+                                        <div className={`mt-4 p-3 rounded-lg text-sm ${formData.q2 === 'b' ? 'bg-emerald-900/40 text-emerald-300' : 'bg-red-900/40 text-red-300'}`}>
+                                            <strong>Anotación OMS:</strong> Correcto es la B. La Peste Negra se movió al ritmo de los barcos mercantes. La Gripe Española se movió en trenes repletos de tropas a nivel mundial. La globalización es el mejor aliado de un virus.
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Q3 */}
+                                <div className={`p-5 rounded-xl border transition-colors ${showResults ? (formData.q3 === 'a' ? 'border-emerald-500 bg-emerald-500/5' : 'border-red-500 bg-red-500/5') : 'border-slate-800 bg-slate-950'}`}>
+                                    <p className="font-bold text-slate-200 mb-3">3. Según tus simulaciones, el patógeno "perfecto" para infectar a todo el mundo debería tener inicialmente:</p>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q3" value="a" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>a) Alta transmisión y nula/baja letalidad (síntomas leves), para pasar desapercibido.</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q3" value="b" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>b) Alta letalidad desde el principio para asustar a los gobiernos.</span>
+                                        </label>
+                                        <label className="flex items-center space-x-3 text-slate-300 cursor-pointer">
+                                            <input type="radio" name="q3" value="c" disabled={showResults} onChange={handleInputChange} className="accent-red-500 w-4 h-4" />
+                                            <span>c) Resistencia a medicamentos extrema, sin importar si se transmite poco.</span>
+                                        </label>
+                                    </div>
+                                    {showResults && (
+                                        <div className={`mt-4 p-3 rounded-lg text-sm ${formData.q3 === 'a' ? 'bg-emerald-900/40 text-emerald-300' : 'bg-red-900/40 text-red-300'}`}>
+                                            <strong>Anotación OMS:</strong> Correcto es la A. La clave es la "transmisión silenciosa". Si nadie sabe que está enfermo, viajan y propagan el virus antes de que los países cierren fronteras.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="border-t border-slate-800 my-6"></div>
+
+                            <div className="space-y-6">
+                                <h3 className="text-xl font-bold text-slate-200">Sección B: Aplicación y Reflexión</h3>
+                                
+                                <div className="bg-slate-950 p-5 rounded-xl border border-slate-800">
+                                    <label className="block text-slate-200 font-bold mb-2">
+                                        4. ¿Qué estrategias de salud pública aplicarías en la vida real para frenar una enfermedad que es extremadamente contagiosa pero apenas tiene síntomas al principio?
+                                    </label>
+                                    <textarea 
+                                        name="q4"
+                                        value={formData.q4}
+                                        onChange={handleInputChange}
+                                        disabled={showResults}
+                                        rows="3" 
+                                        placeholder="Escribe tus conclusiones..."
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-red-500"
+                                    ></textarea>
+                                    {showResults && (
+                                        <div className="mt-4 p-3 rounded-lg text-sm bg-blue-900/20 border border-blue-800/50 text-blue-300">
+                                            <strong>Anotación del Profesor:</strong> Para patógenos asintomáticos, las medidas efectivas son los test masivos, rastreo de contactos, cuarentenas preventivas, mascarillas y restricción de movilidad.
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="bg-slate-950 p-5 rounded-xl border border-slate-800">
+                                    <label className="block text-slate-200 font-bold mb-2">
+                                        5. Reflexión final: ¿Qué enfermedad os resultó más fácil ganar (destruir a la humanidad) en la simulación? ¿Creéis que coincide con la realidad?
+                                    </label>
+                                    <textarea 
+                                        name="q5"
+                                        value={formData.q5}
+                                        onChange={handleInputChange}
+                                        disabled={showResults}
+                                        rows="4" 
+                                        placeholder="Escribe tu reflexión..."
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-red-500"
+                                    ></textarea>
+                                </div>
+                            </div>
+
+                            {!showResults ? (
+                                <button 
+                                    type="submit"
+                                    className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] flex justify-center items-center border-none cursor-pointer"
+                                >
+                                    <i className="fa-solid fa-circle-check text-xl mr-2"></i> Corregir Simulador
+                                </button>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="bg-slate-800 border border-red-500/50 p-6 rounded-xl text-center transition-all">
+                                        <h3 className="text-2xl font-bold text-white mb-2">¡Análisis Completado!</h3>
+                                        <p className="text-lg text-red-400">Puntuación Test: {score} / 3</p>
+                                        <p className="text-slate-300 mt-2">Revisad las anotaciones en cada pregunta para comprender mejor la epidemiología.</p>
+                                    </div>
+                                    
+                                    <a 
+                                        href={getMailtoLink()}
+                                        className="w-full bg-red-800 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all flex justify-center items-center border border-red-600 shadow-[0_0_15px_rgba(239,68,68,0.2)] no-underline"
+                                    >
+                                        <i className="fa-solid fa-paper-plane mr-2 text-xl"></i> Enviar Resultados al Profesor
+                                    </a>
+                                </div>
+                            )}
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
